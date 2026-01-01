@@ -53,7 +53,9 @@ target_compile_definitions(Aeolus PRIVATE
 # 3. Source Files
 target_sources(Aeolus PRIVATE
     src/PluginProcessor.hxx
+    src/PluginProcessor.cxx
     src/PluginEditor.hxx
+    src/PluginEditor.cxx
 )
 
 # 4. Links and Dependencies
