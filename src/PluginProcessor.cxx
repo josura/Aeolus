@@ -1,4 +1,5 @@
 #include "PluginProcessor.hxx"
+#include "PluginEditor.hxx"
 
 AeolusAudioProcessor::AeolusAudioProcessor() 
     : AudioProcessor (BusesProperties().withOutput ("Output", juce::AudioChannelSet::stereo(), true))
@@ -14,17 +15,25 @@ void AeolusAudioProcessor::releaseResources() {}
 void AeolusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
     juce::ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
-    auto totalNumOutputChannels = getTotalNumOutputChannels();
 
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear(i, 0, buffer.getNumSamples());
+    // Handle MIDI
+    for (const auto metadata : midiMessages) {
+        auto msg = metadata.getMessage();
+        if (msg.isNoteOn()) {
+            playhead = 0;
+            isNoteActive = true;
+        } else if (msg.isNoteOff()) {
+            isNoteActive = false;
+        }
+    }
+
+    buffer.clear();
+    if (!isNoteActive) return;
 
     auto currentData = sampleManager.getCurrentBuffer();
     if (currentData == nullptr) return;
 
     const auto& sampleBuffer = currentData->getBuffer();
-    
     auto* leftOut = buffer.getWritePointer(0);
     auto* rightOut = buffer.getWritePointer(1);
     const auto* sampleIn = sampleBuffer.getReadPointer(0);
@@ -33,10 +42,8 @@ void AeolusAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::
         if (playhead < sampleBuffer.getNumSamples()) {
             float sample = sampleIn[playhead];
             leftOut[i] += sample;
-            if (totalNumOutputChannels > 1) rightOut[i] += sample;
+            if (buffer.getNumChannels() > 1) rightOut[i] += sample;
             playhead++;
-        } else {
-            playhead = 0; 
         }
     }
 }

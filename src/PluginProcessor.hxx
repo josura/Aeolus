@@ -1,5 +1,6 @@
 #pragma once
-#include <JuceHeader.h>
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_formats/juce_audio_formats.h>
 #include "DSP/SampleManager.hxx"
 
 class AeolusAudioProcessor : public juce::AudioProcessor
@@ -37,6 +38,7 @@ private:
     SampleManager sampleManager;
     juce::AudioFormatManager formatManager;
     int playhead = 0;
+    bool isNoteActive = false; // MIDI triggering flag
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AeolusAudioProcessor)
 };

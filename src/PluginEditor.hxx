@@ -1,37 +1,26 @@
 #pragma once
-#include <JuceHeader.h>
+#include <juce_gui_basics/juce_gui_basics.h>
 #include "PluginProcessor.hxx"
-#include "../DSP/FileLoader.hxx"
-#include "../UI/WaveformComponent.hxx"
+#include "DSP/FileLoader.hxx"
+#include "UI/WaveformComponent.hxx"
 
 class AeolusAudioProcessorEditor : public juce::AudioProcessorEditor,
-                                     public juce::FileDragAndDropTarget
+                                   public juce::FileDragAndDropTarget
 {
 public:
-    // Constructor
-    AeolusAudioProcessorEditor(FragmentAudioProcessor& p)
-        : juce::AudioProcessorEditor(&p), processor(p),
-          waveformVisualizer(processor.getFormatManager())
-    {
-        setSize(600, 400);
-        addAndMakeVisible(waveformVisualizer);
-    }
+    AeolusAudioProcessorEditor(AeolusAudioProcessor&);
+    ~AeolusAudioProcessorEditor() override;
 
-    bool isInterestedInFileDrag(const juce::StringArray& files) override { return true; }
-    
-    void filesDropped(const juce::StringArray& files, int, int) override {
-        juce::File file(files[0]);
-        
-        // 1. Update the UI Visualizer
-        waveformVisualizer.setFile(file);
-        
-        // 2. Load the data and push it to the Processor (Audio Thread)
-        auto newBuffer = loader.loadFile(file);
-        processor.getSampleManager().updateCurrentBuffer(newBuffer);
-    }
+    void paint(juce::Graphics&) override;
+    void resized() override;
+
+    bool isInterestedInFileDrag(const juce::StringArray&) override;
+    void filesDropped(const juce::StringArray&, int, int) override;
 
 private:
+    AeolusAudioProcessor& processor;
     WaveformComponent waveformVisualizer;
     FileLoader loader;
-    FragmentAudioProcessor& processor;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AeolusAudioProcessorEditor)
 };
