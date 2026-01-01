@@ -1,5 +1,5 @@
 #pragma once
-#include "SampleBufferData.h"
+#include "SampleBufferData.hxx"
 
 class SampleManager {
 public:

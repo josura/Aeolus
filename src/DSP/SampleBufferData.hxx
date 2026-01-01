@@ -1,5 +1,5 @@
 #pragma once
-#include <JuceHeader.h>
+#include <juce_audio_basics/juce_audio_basics.h>
 
 /**
  * A thread-safe, shared buffer for the sampler.
