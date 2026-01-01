@@ -13,3 +13,11 @@ Aeolus/
 ├── tests/                # Unit tests (Catch2 or GTest)
 ├── modules/              # Git submodules (like JUCE)
 └── resources/            # Icons, fonts, and assets
+
+## Requirements
+- CMake 3.15+
+- A C++23 compatible compiler (GCC 11+, Clang 12+, MSVC 2019+)
+- gtk 3 (Linux), and webkit2gtk (for embedded browser, Linux)
+- ALSA development libraries (Linux)
+- freetype2 development libraries (Linux)
+- sound2 development libraries

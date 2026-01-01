@@ -7,6 +7,22 @@ project(Aeolus VERSION 0.1.0 LANGUAGES C CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# Find GTK3 on Linux for JUCE GUI support
+if(UNIX AND NOT APPLE)
+    find_package(PkgConfig REQUIRED)
+    
+    # IMPORTED_TARGET is required for each module to create the PkgConfig::<PREFIX> target
+    pkg_check_modules(WEBKIT REQUIRED IMPORTED_TARGET webkit2gtk-4.1)
+    pkg_check_modules(GTK3 REQUIRED IMPORTED_TARGET gtk+-3.0)
+    pkg_check_modules(ALSA REQUIRED IMPORTED_TARGET alsa)
+    pkg_check_modules(FREETYPE REQUIRED IMPORTED_TARGET freetype2)
+    
+    message(STATUS "WebKitGTK found: ${WEBKIT_VERSION}")
+    message(STATUS "GTK3 found: ${GTK3_VERSION}")
+    message(STATUS "ALSA found: ${ALSA_VERSION}")
+    message(STATUS "Freetype found: ${FREETYPE_VERSION}")
+endif()
+
 # 1. Fetch JUCE
 include(FetchContent)
 FetchContent_Declare(
@@ -25,12 +41,13 @@ juce_add_plugin(Aeolus
     # Formats: VST3 and LV2 (Standard in JUCE 7+)
     FORMATS VST3 LV2 
     PRODUCT_NAME "Aeolus"
+    LV2URI "https://josura.com/plugins/aeolus" # To be changed later to actual URI 
 )
 
 # 3. Source Files
 target_sources(Aeolus PRIVATE
-    src/PluginProcessor.cxx
-    src/PluginEditor.cxx
+    src/PluginProcessor.hxx
+    src/PluginEditor.hxx
 )
 
 # 4. Links and Dependencies
@@ -38,8 +55,19 @@ target_link_libraries(Aeolus PRIVATE
     juce::juce_audio_utils
     juce::juce_audio_processors
     juce::juce_gui_basics
+    juce::juce_gui_extra    # it's required for file choosers/dialogs
     juce::juce_dsp
 )
+
+# Link Linux-specific system libraries
+if(UNIX AND NOT APPLE)
+    target_link_libraries(Aeolus PRIVATE
+        PkgConfig::WEBKIT
+        PkgConfig::GTK3 
+        PkgConfig::ALSA 
+        PkgConfig::FREETYPE
+    )
+endif()
 
 # 5. Optimization Flags for High Performance
 if(MSVC)
