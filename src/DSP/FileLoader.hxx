@@ -1,6 +1,6 @@
 #pragma once
-#include <JuceHeader.h>
-#include "SampleProvider.h" // The ReferenceCountedBuffer we defined earlier
+#include <juce_audio_formats/juce_audio_formats.h>
+#include "SampleBufferData.hxx" // The ReferenceCountedBuffer we defined earlier
 
 class FileLoader {
 public:
