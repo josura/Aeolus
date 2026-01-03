@@ -24,3 +24,12 @@ Aeolus/
 - freetype2 development libraries (Linux)
 - sound2 development libraries
 - curl
+
+## Building
+```bash
+mkdir build
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+cmake --build . --config Release
+make
+```
