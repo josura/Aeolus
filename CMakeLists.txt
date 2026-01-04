@@ -41,7 +41,8 @@ juce_add_plugin(Aeolus
     NEEDS_MIDI_INPUT TRUE
     NEEDS_MIDI_OUTPUT FALSE
     # Formats: VST3 and LV2 (Standard in JUCE 7+)
-    FORMATS VST3 LV2 
+    # Standalone format to have an easy way to test the plugin (creates an executable)
+    FORMATS VST3 LV2 Standalone
     PRODUCT_NAME "Aeolus"
     LV2URI "https://josura.com/plugins/aeolus" # To be changed later to actual URI 
 )
