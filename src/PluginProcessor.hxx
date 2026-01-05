@@ -2,6 +2,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_formats/juce_audio_formats.h>
 #include "DSP/SampleManager.hxx"
+#include "DSP/Envelopes.hxx"
 
 class AeolusAudioProcessor : public juce::AudioProcessor
 {
@@ -42,6 +43,7 @@ private:
     int playhead = 0;
     bool isNoteActive = false; // MIDI triggering flag
     std::atomic<bool> noteTriggered { false }; // For test note triggering
+    std::unique_ptr<Envelope> activeEnvelope = std::make_unique<ParabolicEnvelope>(); // Example envelope
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AeolusAudioProcessor)
 };
