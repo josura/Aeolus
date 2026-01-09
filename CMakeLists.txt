@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.24)
 
 # Project metadata
-project(Aeolus VERSION 0.1.0 LANGUAGES C CXX)
+project(Pruvulazzu VERSION 0.1.0 LANGUAGES C CXX)
 
 # Enable C++23 for latest features (std::expected, std::span improvements)
 set(CMAKE_CXX_STANDARD 23)
@@ -35,7 +35,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(juce)
 
 # 2. Create the Plugin
-juce_add_plugin(Aeolus
+juce_add_plugin(Pruvulazzu
     COMPANY_NAME "josura"
     IS_SYNTH TRUE
     NEEDS_MIDI_INPUT TRUE
@@ -43,16 +43,16 @@ juce_add_plugin(Aeolus
     # Formats: VST3 and LV2 (Standard in JUCE 7+)
     # Standalone format to have an easy way to test the plugin (creates an executable)
     FORMATS VST3 LV2 Standalone
-    PRODUCT_NAME "Aeolus"
-    LV2URI "https://josura.com/plugins/aeolus" # To be changed later to actual URI 
+    PRODUCT_NAME "Pruvulazzu"
+    LV2URI "https://josura.com/plugins/pruvulazzu" # To be changed later to actual URI 
 )
 
-target_compile_definitions(Aeolus PRIVATE
+target_compile_definitions(Pruvulazzu PRIVATE
     JUCE_VST3_CAN_REPLACE_VST2=0
 )
 
 # 3. Source Files
-target_sources(Aeolus PRIVATE
+target_sources(Pruvulazzu PRIVATE
     src/PluginProcessor.hxx
     src/PluginProcessor.cxx
     src/PluginEditor.hxx
@@ -60,7 +60,7 @@ target_sources(Aeolus PRIVATE
 )
 
 # 4. Links and Dependencies
-target_link_libraries(Aeolus PRIVATE
+target_link_libraries(Pruvulazzu PRIVATE
     juce::juce_audio_utils
     juce::juce_audio_processors
     juce::juce_gui_basics
@@ -70,7 +70,7 @@ target_link_libraries(Aeolus PRIVATE
 
 # Link Linux-specific system libraries
 if(UNIX AND NOT APPLE)
-    target_link_libraries(Aeolus PRIVATE
+    target_link_libraries(Pruvulazzu PRIVATE
         PkgConfig::WEBKIT
         PkgConfig::GTK3 
         PkgConfig::ALSA 
@@ -81,7 +81,7 @@ endif()
 
 # 5. Optimization Flags for High Performance
 if(MSVC)
-    target_compile_options(Aeolus PRIVATE /O2 /arch:AVX2)
+    target_compile_options(Pruvulazzu PRIVATE /O2 /arch:AVX2)
 else()
-    target_compile_options(Aeolus PRIVATE -O3 -march=native -ffast-math)
+    target_compile_options(Pruvulazzu PRIVATE -O3 -march=native -ffast-math)
 endif()
