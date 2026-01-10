@@ -12,13 +12,12 @@ Pruvulazzu/
 ├── CMakeLists.txt        # Main build script
 ├── src/               # All C++ code
 │   ├── PluginProcessor.cpp
-│   ├── PluginProcessor.h
+│   ├── PluginProcessor.hxx
 │   ├── PluginEditor.cpp
-│   ├── PluginEditor.h
+│   ├── PluginEditor.hxx
 │   └── DSP/              # Grain logic, buffers, etc.
 ├── tests/                # Unit tests (Catch2 or GTest)
-├── modules/              # Git submodules (like JUCE)
-└── resources/            # Icons, fonts, and assets
+└── resources/            # Icons, fonts, and assets, TODO be added
 ```
 
 ## Requirements
