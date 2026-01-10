@@ -16,7 +16,7 @@ Pruvulazzu/
 │   ├── PluginEditor.cpp
 │   ├── PluginEditor.hxx
 │   └── DSP/              # Grain logic, buffers, etc.
-├── tests/                # Unit tests (Catch2 or GTest)
+├── tests/                # Unit tests (GTest most probably)
 └── resources/            # Icons, fonts, and assets, TODO be added
 ```
 
