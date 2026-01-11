@@ -43,7 +43,7 @@ public:
         g.setColour(juce::Colours::white.withAlpha(0.6f)); // Semi-transparent
         for (float pos : currentPositions) {
             auto x = pos * getWidth();
-            g.drawLine(x, 0, x, getHeight(), 1.5f);
+            g.drawLine(x, 0, x, getHeight(), 1.5f);  //thicker line for visibility, TODO should be adjusted later as needed
         }
     }
 
