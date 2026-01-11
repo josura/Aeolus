@@ -47,6 +47,5 @@ private:
     int currentSampleIndex = 0; // The absolute index in the source buffer
     bool active = false;
     float pan = 0.5f;
-    bool active = false;
     Envelope* currentEnvelope = nullptr; 
 };
