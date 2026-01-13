@@ -3,6 +3,7 @@
 #include <juce_audio_formats/juce_audio_formats.h>
 #include "DSP/SampleManager.hxx"
 #include "DSP/Envelopes.hxx"
+#include "DSP/GrainEngine.hxx"
 
 class PruvulazzuAudioProcessor : public juce::AudioProcessor
 {
@@ -33,6 +34,8 @@ public:
 
     void triggerTestNote() { noteTriggered = true; }
 
+    std::vector<float> getActiveGrainPositions() const;
+
     // Helpers for the UI
     SampleManager& getSampleManager() { return sampleManager; }
     juce::AudioFormatManager& getFormatManager() { return formatManager; }
@@ -44,6 +47,8 @@ private:
     bool isNoteActive = false; // MIDI triggering flag
     std::atomic<bool> noteTriggered { false }; // For test note triggering
     std::unique_ptr<Envelope> activeEnvelope = std::make_unique<ParabolicEnvelope>(); // Example envelope
+    GrainEngine grainEngine;
+    std::atomic<float> currentPlayheadPos { -1.0f }; // 0.0 to 1.0 for UI
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PruvulazzuAudioProcessor)
 };
