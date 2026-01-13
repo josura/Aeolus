@@ -12,47 +12,82 @@ PruvulazzuAudioProcessor::~PruvulazzuAudioProcessor() {}
 void PruvulazzuAudioProcessor::prepareToPlay (double, int) { playhead = 0; }
 void PruvulazzuAudioProcessor::releaseResources() {}
 
-void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
+// void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+// {
+//     juce::ScopedNoDenormals noDenormals;
+
+//     // Check if a test note has been triggered from the UI
+//     if (noteTriggered.exchange(false))
+//     {
+//         // Inject a MIDI Note On (Note 60, Velocity 1.0) into the buffer
+//         midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
+//     }
+
+//     // Handle MIDI
+//     for (const auto metadata : midiMessages) {
+//         auto msg = metadata.getMessage();
+//         if (msg.isNoteOn()) {
+//             playhead = 0;
+//             isNoteActive = true;
+//         } else if (msg.isNoteOff()) {
+//             isNoteActive = false;
+//         }
+//     }
+
+//     buffer.clear();
+//     if (!isNoteActive) return;
+
+//     auto currentData = sampleManager.getCurrentBuffer();
+//     if (currentData == nullptr) return;
+
+//     const auto& sampleBuffer = currentData->getBuffer();
+//     auto* leftOut = buffer.getWritePointer(0);
+//     auto* rightOut = buffer.getWritePointer(1);
+//     const auto* sampleIn = sampleBuffer.getReadPointer(0);
+
+//     for (int i = 0; i < buffer.getNumSamples(); ++i) {
+//         if (playhead < sampleBuffer.getNumSamples()) {
+//             float sample = sampleIn[playhead];
+//             leftOut[i] += sample;
+//             if (buffer.getNumChannels() > 1) rightOut[i] += sample;
+//             playhead++;
+//         }
+//     }
+// }
+
+std::vector<float> PruvulazzuAudioProcessor::getActiveGrainPositions() const  {
+    auto currentData = sampleManager.getCurrentBuffer();
+    int totalLen = (currentData != nullptr) ? currentData->getBuffer().getNumSamples() : 0;
+    return grainEngine.getActivePositions(totalLen);
+}
+
+void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
     juce::ScopedNoDenormals noDenormals;
-
-    // Check if a test note has been triggered from the UI
-    if (noteTriggered.exchange(false))
-    {
-        // Inject a MIDI Note On (Note 60, Velocity 1.0) into the buffer
-        midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
-    }
-
-    // Handle MIDI
-    for (const auto metadata : midiMessages) {
-        auto msg = metadata.getMessage();
-        if (msg.isNoteOn()) {
-            playhead = 0;
-            isNoteActive = true;
-        } else if (msg.isNoteOff()) {
-            isNoteActive = false;
-        }
-    }
-
     buffer.clear();
-    if (!isNoteActive) return;
 
     auto currentData = sampleManager.getCurrentBuffer();
     if (currentData == nullptr) return;
 
-    const auto& sampleBuffer = currentData->getBuffer();
-    auto* leftOut = buffer.getWritePointer(0);
-    auto* rightOut = buffer.getWritePointer(1);
-    const auto* sampleIn = sampleBuffer.getReadPointer(0);
+    // Check if a test note has been triggered from the UI
+    if (noteTriggered.exchange(false)) {
+        // Inject a MIDI Note On (Note 60, Velocity 1.0) into the buffer
+        midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
+    }
 
-    for (int i = 0; i < buffer.getNumSamples(); ++i) {
-        if (playhead < sampleBuffer.getNumSamples()) {
-            float sample = sampleIn[playhead];
-            leftOut[i] += sample;
-            if (buffer.getNumChannels() > 1) rightOut[i] += sample;
-            playhead++;
+    // Handle MIDI triggers
+    for (const auto metadata : midiMessages) {
+        auto msg = metadata.getMessage();
+        if (msg.isNoteOn()) {
+            // "Generalization": Trigger the sample as one large grain
+            grainEngine.triggerGrain(0, currentData->getBuffer().getNumSamples(), 0.5f, activeEnvelope.get());
         }
     }
+
+    // Process all active grains
+    grainEngine.process(buffer, currentData);
+    
+    // Update playhead for UI (simplified to track the last triggered grain or engine state)
+    // For now, we'll keep this simple; in a full engine, you'd track the oldest active grain
 }
 
 juce::AudioProcessorEditor* PruvulazzuAudioProcessor::createEditor() {
