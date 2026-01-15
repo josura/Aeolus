@@ -37,3 +37,12 @@ cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 make
 ```
+
+## TODO
+- [ ] Add more DSP features (LFO, Envelopes, etc.)
+- [ ] Improve UI/UX design
+- [ ] Add more sample formats support
+- [ ] Write unit tests
+- [ ] Documentation
+- [ ] Grain logic optimization and improvements
+- [ ] Better visualization of grains in the waveform display (maybe small windows or clear markers)
