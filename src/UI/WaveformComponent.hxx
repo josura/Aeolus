@@ -32,7 +32,7 @@ public:
     void paint(juce::Graphics& g) override {
         // Draw Waveform (Existing code)
         g.fillAll(juce::Colours::black);
-        g.setColour(juce::Colours::cyan);
+        g.setColour(juce::Colours::cyan.withAlpha(0.8f)); // Slightly transparent for layering
         if( thumbnail.getNumChannels() > 0 ){
             thumbnail.drawChannels(g, getLocalBounds(), 0.0, thumbnail.getTotalLength(), 1.0f);
         } else {
