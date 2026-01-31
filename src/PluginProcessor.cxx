@@ -61,12 +61,44 @@ std::vector<float> PruvulazzuAudioProcessor::getActiveGrainPositions() const  {
     return grainEngine.getActivePositions(totalLen);
 }
 
-void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
-    juce::ScopedNoDenormals noDenormals;
-    buffer.clear();
+// void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
+//     juce::ScopedNoDenormals noDenormals;
+//     buffer.clear();
 
+//     auto currentData = sampleManager.getCurrentBuffer();
+//     if (currentData == nullptr) return;
+
+//     // Check if a test note has been triggered from the UI
+//     if (noteTriggered.exchange(false)) {
+//         // Inject a MIDI Note On (Note 60, Velocity 1.0) into the buffer
+//         midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
+//     }
+
+//     // Handle MIDI triggers
+//     for (const auto metadata : midiMessages) {
+//         auto msg = metadata.getMessage();
+//         if (msg.isNoteOn()) {
+//             // "Generalization": Trigger the sample as one large grain
+//             grainEngine.triggerGrain(0, currentData->getBuffer().getNumSamples(), 0.5f, activeEnvelope.get());
+//         }
+//     }
+
+//     // Process all active grains
+//     grainEngine.process(buffer, currentData);
+    
+//     // Update playhead for UI (simplified to track the last triggered grain or engine state)
+//     // For now, we'll keep this simple; in a full engine, you'd track the oldest active grain
+// }
+
+void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+{
+    juce::ScopedNoDenormals noDenormals;
+    
     auto currentData = sampleManager.getCurrentBuffer();
-    if (currentData == nullptr) return;
+    if (currentData == nullptr) {
+        buffer.clear();
+        return;
+    }
 
     // Check if a test note has been triggered from the UI
     if (noteTriggered.exchange(false)) {
@@ -74,20 +106,38 @@ void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
         midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
     }
 
-    // Handle MIDI triggers
+    // 1. MIDI Handling & Scheduling
     for (const auto metadata : midiMessages) {
         auto msg = metadata.getMessage();
         if (msg.isNoteOn()) {
-            // "Generalization": Trigger the sample as one large grain
-            grainEngine.triggerGrain(0, currentData->getBuffer().getNumSamples(), 0.5f, activeEnvelope.get());
+            isNoteActive = true;
+            samplesSinceLastGrain = grainIntervalSamples; // Force immediate trigger
+        } else if (msg.isNoteOff()) {
+            isNoteActive = false;
         }
     }
 
-    // Process all active grains
+    // 2. The Scheduler: Firing "Pruvulazzu" (Dust)
+    if (isNoteActive) {
+        samplesSinceLastGrain += buffer.getNumSamples();
+        
+        if (samplesSinceLastGrain >= grainIntervalSamples) {
+            // Trigger a new grain! 
+            // Randomized start pos and length for that "dust" effect
+            int totalSamples = currentData->getBuffer().getNumSamples();
+            int randomStart = juce::Random::getSystemRandom().nextInt(totalSamples);
+            int length = 4410 * 2; // 200ms grains
+            float randomPan = juce::Random::getSystemRandom().nextFloat();
+
+            grainEngine.triggerGrain(randomStart, length, randomPan, nullptr);
+            
+            samplesSinceLastGrain = 0;
+        }
+    }
+
+    // 3. DSP Processing
+    buffer.clear();
     grainEngine.process(buffer, currentData);
-    
-    // Update playhead for UI (simplified to track the last triggered grain or engine state)
-    // For now, we'll keep this simple; in a full engine, you'd track the oldest active grain
 }
 
 juce::AudioProcessorEditor* PruvulazzuAudioProcessor::createEditor() {
