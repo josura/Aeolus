@@ -9,7 +9,13 @@ PruvulazzuAudioProcessor::PruvulazzuAudioProcessor()
 
 PruvulazzuAudioProcessor::~PruvulazzuAudioProcessor() {}
 
-void PruvulazzuAudioProcessor::prepareToPlay (double, int) { playhead = 0; }
+// void PruvulazzuAudioProcessor::prepareToPlay (double, int) { playhead = 0; }
+
+void PruvulazzuAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
+    grainEngine.prepare(100); // Allow up to 100 simultaneous grains
+    samplesSinceLastGrain = 0;
+}
+
 void PruvulazzuAudioProcessor::releaseResources() {}
 
 // void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
@@ -90,15 +96,12 @@ std::vector<float> PruvulazzuAudioProcessor::getActiveGrainPositions() const  {
 //     // For now, we'll keep this simple; in a full engine, you'd track the oldest active grain
 // }
 
-void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
-{
+void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) {
     juce::ScopedNoDenormals noDenormals;
-    
+    buffer.clear();
+
     auto currentData = sampleManager.getCurrentBuffer();
-    if (currentData == nullptr) {
-        buffer.clear();
-        return;
-    }
+    if (currentData == nullptr) return;
 
     // Check if a test note has been triggered from the UI
     if (noteTriggered.exchange(false)) {
@@ -106,37 +109,28 @@ void PruvulazzuAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer, ju
         midiMessages.addEvent(juce::MidiMessage::noteOn(1, 60, 1.0f), 0);
     }
 
-    // 1. MIDI Handling & Scheduling
+    // Handle MIDI & Scheduler
     for (const auto metadata : midiMessages) {
         auto msg = metadata.getMessage();
         if (msg.isNoteOn()) {
             isNoteActive = true;
             samplesSinceLastGrain = grainIntervalSamples; // Force immediate trigger
-        } else if (msg.isNoteOff()) {
-            isNoteActive = false;
-        }
+        } else if (msg.isNoteOff()) isNoteActive = false;
     }
 
-    // 2. The Scheduler: Firing "Pruvulazzu" (Dust)
     if (isNoteActive) {
         samplesSinceLastGrain += buffer.getNumSamples();
-        
         if (samplesSinceLastGrain >= grainIntervalSamples) {
-            // Trigger a new grain! 
-            // Randomized start pos and length for that "dust" effect
-            int totalSamples = currentData->getBuffer().getNumSamples();
-            int randomStart = juce::Random::getSystemRandom().nextInt(totalSamples);
-            int length = 4410 * 2; // 200ms grains
-            float randomPan = juce::Random::getSystemRandom().nextFloat();
-
-            grainEngine.triggerGrain(randomStart, length, randomPan, nullptr);
-            
+            int totalLen = currentData->getBuffer().getNumSamples();
+            // Generalization: To act as a singular sampler, trigger one grain 
+            // starting at 0 with the full buffer length.
+            int start = juce::Random::getSystemRandom().nextInt(totalLen);
+            int len = 8820; // 200ms grains
+            grainEngine.triggerGrain(start, len, juce::Random::getSystemRandom().nextFloat(), activeEnvelope.get());
             samplesSinceLastGrain = 0;
         }
     }
 
-    // 3. DSP Processing
-    buffer.clear();
     grainEngine.process(buffer, currentData);
 }
 
