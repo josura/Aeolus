@@ -40,7 +40,10 @@ make
 
 ## TODO
 - [ ] Add more DSP features (LFO, Envelopes, etc.)
-- [ ] Improve UI/UX design
+- [ ] Improve UI/UX design (Visualization of grains, better controls)
+- [ ] Add more controls for grain parameters (density, spread, etc.)
+- [ ] MIDI learn functionality
+- [ ] Implement preset management system
 - [ ] Add more sample formats support
 - [ ] Write unit tests
 - [x] Documentation
