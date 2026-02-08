@@ -12,6 +12,8 @@ PruvulazzuAudioProcessorEditor::PruvulazzuAudioProcessorEditor(PruvulazzuAudioPr
     testButton.onClick = [this] { 
         processor.triggerTestNote(); 
     };
+
+    startTimerHz(60); // Update playhead positions at 60 FPS
     
 }
 
