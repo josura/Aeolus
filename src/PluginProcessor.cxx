@@ -1,3 +1,8 @@
+/**
+ * Pruvulazzu - A JUCE-based granular synthesizer plugin
+ * Copyright (C) 2026  Giorgio Locicero
+ * @brief This file contains the implementation of the main audio processor class for the Pruvulazzu plugin.
+ */
 #include "PluginProcessor.hxx"
 #include "PluginEditor.hxx"
 
