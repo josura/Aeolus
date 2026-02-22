@@ -1,3 +1,8 @@
+/**
+ * Pruvulazzu - A JUCE-based granular synthesizer plugin
+ * Copyright (C) 2026  Giorgio Locicero
+ * @brief This file contains the declaration of the main audio processor class for the Pruvulazzu plugin.
+ */
 #pragma once
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_formats/juce_audio_formats.h>
@@ -5,9 +10,16 @@
 #include "DSP/Envelopes.hxx"
 #include "DSP/GrainEngine.hxx"
 
+/**
+ * The main audio processor class for the Pruvulazzu plugin. This class handles audio processing, MIDI events, and parameter management.
+ */
 class PruvulazzuAudioProcessor : public juce::AudioProcessor
 {
 public:
+    /**
+     * Constructor of the PruvulazzuAudioProcessor. Initializes the audio processor and sets up parameters.
+     * Default parameters include "density" for grain density and "size" for grain size, both of which can be adjusted by the user.
+     */
     PruvulazzuAudioProcessor();
     ~PruvulazzuAudioProcessor() override;
 
